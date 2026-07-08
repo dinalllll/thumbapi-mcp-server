@@ -1,0 +1,51 @@
+{
+  "name": "@thumbapi/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for ThumbAPI — generate thumbnails and OG images from a title via the ThumbAPI REST API.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "thumbapi",
+    "thumbnail",
+    "og-image",
+    "ai"
+  ],
+  "license": "MIT",
+  "author": "ThumbAPI",
+  "homepage": "https://thumbapi.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dinalllll/thumbapi-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dinalllll/thumbapi-mcp-server/issues"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "thumbapi-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "smoke": "node scripts/smoke-test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
