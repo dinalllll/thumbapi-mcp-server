@@ -1,0 +1,73 @@
+# Publishes @thumbapi/mcp-server to npm on every version tag push.
+#
+# Uses npm OIDC Trusted Publishing (no long-lived NPM_TOKEN secret) plus
+# --provenance so anyone can cryptographically verify a given release came
+# from this exact repo and commit.
+#
+# ─── ONE-TIME SETUP ────────────────────────────────────────────────────────────
+#
+# Option A — OIDC Trusted Publishing (recommended):
+#   1. On npmjs.com, open the package settings (or the org's "Add trusted
+#      publisher" screen if the package does not yet exist).
+#   2. Under "Publish access" → "Trusted Publishers", click "Add a publisher".
+#   3. Select GitHub Actions and fill in:
+#        Repository owner:  dinalllll
+#        Repository name:   thumbapi-mcp-server
+#        Workflow filename: publish.yml
+#        Environment:       (leave blank)
+#   4. Do NOT set an NPM_TOKEN secret. OIDC replaces it.
+#
+# Option B — Automation Token (fallback):
+#   1. On npmjs.com: Access Tokens → Generate → Granular Access Token,
+#      scoped to @thumbapi/mcp-server with "Read and write".
+#   2. GitHub: Settings → Secrets → Actions → new secret `NPM_TOKEN`.
+#
+# ─── RELEASE FLOW ──────────────────────────────────────────────────────────────
+#
+#   npm version patch|minor|major   # bumps package.json and creates a tag
+#   git push --follow-tags          # push commit + tag; this workflow runs
+
+name: Publish
+
+on:
+  push:
+    tags:
+      # Matches 0.1.0, 1.2.3, 2.0.0-rc.1, etc. No `v` prefix.
+      - '*.*.*'
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to mint an OIDC token for npm provenance + Trusted Publisher.
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish
+        # `access` and `provenance` are declared in package.json → publishConfig,
+        # so `npm publish` alone is enough. The fallback NPM_TOKEN is written
+        # to .npmrc if provided; with OIDC it stays unset and npm auths via
+        # the id-token permission above.
+        run: |
+          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
