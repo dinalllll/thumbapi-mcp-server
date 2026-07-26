@@ -240,6 +240,25 @@ async function startPendingLogin(): Promise<PendingLogin> {
 
 const FORMATS = ["youtube", "instagram", "x", "blogpost", "linkedin"] as const;
 
+// Full category list accepted by the ThumbAPI /v1/generate endpoint. Kept
+// in sync with the backend validator (src/lib/prompt-builder CATEGORY_BRIEFS)
+// — any drift will surface as a 400 "category must be one of" from the API.
+const CATEGORIES = [
+  "auto",
+  "tech-saas",
+  "business-finance",
+  "education-tutorial",
+  "fitness-wellness",
+  "medical-healthcare",
+  "lifestyle-vlog",
+  "food-cooking",
+  "travel",
+  "gaming",
+  "entertainment-comedy",
+  "news-commentary",
+  "creative-design",
+] as const;
+
 const GenerateInput = z.object({
   title: z
     .string()
@@ -248,7 +267,7 @@ const GenerateInput = z.object({
   format: z.enum(FORMATS),
   model: z.enum(["sd", "hd"]).optional(),
   outputFormat: z.enum(["webp", "png"]).optional(),
-  category: z.string().optional(),
+  category: z.enum(CATEGORIES).optional(),
 });
 
 type GenerateInputT = z.infer<typeof GenerateInput>;
@@ -282,8 +301,9 @@ const TOOL_INPUT_SCHEMA = {
     },
     category: {
       type: "string",
+      enum: [...CATEGORIES],
       description:
-        "Optional content category hint that biases visual style (e.g. `tech`, `finance`, `gaming`, `cooking`). Leave empty to let the API auto-detect from the title.",
+        "Optional content category hint that biases visual style. Choose the closest match, or omit to let the API auto-detect from the title (equivalent to `auto`).",
     },
   },
   required: ["title", "format"],

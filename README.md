@@ -147,7 +147,15 @@ Generates a thumbnail from a title.
 | `format`       | `youtube` \| `instagram` \| `x` \| `blogpost` \| `linkedin` | yes    | Target platform / aspect ratio. |
 | `model`        | `sd` \| `hd`                                             | no       | Default `sd` (10 credits). `hd` needs Pro/Business (20 credits). |
 | `outputFormat` | `webp` \| `png`                                          | no       | Default `webp`. |
-| `category`     | string                                                   | no       | Content category hint (e.g. `tech-saas`, `gaming`). See the [API docs](https://thumbapi.dev/docs/endpoints/generate#categories) for the full list. |
+| `category`     | one of the values below                                  | no       | Content category hint that biases visual style. Omit to auto-detect from the title. |
+
+**`category` accepted values** — the schema constrains this to the list below;
+the LLM should pick the closest match, or leave `category` unset:
+
+`auto`, `tech-saas`, `business-finance`, `education-tutorial`,
+`fitness-wellness`, `medical-healthcare`, `lifestyle-vlog`, `food-cooking`,
+`travel`, `gaming`, `entertainment-comedy`, `news-commentary`,
+`creative-design`.
 
 Returns an MCP `image` content block plus a text summary that includes:
 
